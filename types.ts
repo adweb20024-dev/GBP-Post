@@ -1,9 +1,18 @@
+
 export interface PostFormData {
   businessName: string;
   category: string;
   city: string;
   audience: string;
   topic: string;
+}
+
+export interface BusinessProfile {
+  id: string;
+  businessName: string;
+  category: string;
+  city: string;
+  audience: string;
 }
 
 export interface GeneratedPost {

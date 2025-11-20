@@ -1,13 +1,15 @@
+
 import React, { useState } from 'react';
 import { Copy, Check, ExternalLink, MessageSquare, Image as ImageIcon } from 'lucide-react';
-import { GeneratedPost } from '../types';
+import { GeneratedPost, PostFormData } from '../types';
 
 interface ResultCardProps {
   post: GeneratedPost | null;
   loading: boolean;
+  formData: PostFormData;
 }
 
-const ResultCard: React.FC<ResultCardProps> = ({ post, loading }) => {
+const ResultCard: React.FC<ResultCardProps> = ({ post, loading, formData }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -23,7 +25,7 @@ const ResultCard: React.FC<ResultCardProps> = ({ post, loading }) => {
 
   if (loading) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-200 min-h-[400px]">
+      <div className="h-full flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-200 min-h-[500px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
         <p className="text-gray-500 font-medium animate-pulse">Generating copy and image...</p>
       </div>
@@ -32,13 +34,13 @@ const ResultCard: React.FC<ResultCardProps> = ({ post, loading }) => {
 
   if (!post) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-200 min-h-[400px] text-center">
+      <div className="h-full flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-200 min-h-[500px] text-center">
         <div className="bg-indigo-50 p-4 rounded-full mb-4">
           <MessageSquare className="w-8 h-8 text-indigo-500" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Generate</h3>
         <p className="text-gray-500 max-w-xs">
-          Fill out the business details on the left to create a high-converting Google Business Profile update with a custom image.
+          Select a saved business or fill out the details to create a high-converting Google Business Profile update.
         </p>
       </div>
     );
@@ -46,71 +48,72 @@ const ResultCard: React.FC<ResultCardProps> = ({ post, loading }) => {
 
   return (
     <div className="h-full flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
-      <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center flex-shrink-0">
-        <h2 className="text-white font-semibold flex items-center gap-2">
-          <ExternalLink className="w-5 h-5" />
-          Generated Preview
-        </h2>
-        <span className="text-indigo-200 text-xs font-mono">GEMINI + IMAGEN</span>
+      {/* Preview Header simulating a social post */}
+      <div className="bg-white p-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-indigo-100 border border-indigo-200 overflow-hidden flex items-center justify-center flex-shrink-0 text-indigo-600 font-bold text-sm">
+           {formData.businessName ? formData.businessName.substring(0, 2).toUpperCase() : 'BN'}
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 text-sm">{formData.businessName || 'Your Business'}</h3>
+          <p className="text-xs text-gray-500">Just now · {formData.city || 'Local'}</p>
+        </div>
+        <div className="ml-auto bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full font-medium">
+          Preview
+        </div>
       </div>
 
-      <div className="p-6 flex-grow flex flex-col">
+      <div className="p-6 flex-grow flex flex-col overflow-y-auto">
         
         {post.imageUrl && (
           <div className="mb-6">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-              <ImageIcon className="w-3 h-3" /> Generated Image
-            </label>
-            <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-gray-100">
+            <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-gray-100 relative group">
                <img 
                 src={post.imageUrl} 
                 alt="AI Generated" 
                 className="w-full h-auto object-cover max-h-[400px]"
               />
+              <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                AI Generated
+              </div>
             </div>
           </div>
         )}
 
         <div className="flex-grow">
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
-            Post Body (Optimized for SEO)
-          </label>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-gray-800 leading-relaxed whitespace-pre-wrap font-medium">
+          <div className="prose prose-indigo prose-sm max-w-none text-gray-800 leading-relaxed whitespace-pre-wrap font-normal">
             {post.body}
           </div>
           
-          <div className="mt-6">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
-              Call to Action Button
-            </label>
-            <div className="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 border-indigo-200">
+          <div className="mt-6 flex justify-start">
+            <div className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-full text-white bg-blue-600 shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               {post.cta}
             </div>
           </div>
         </div>
-
-        <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end flex-shrink-0">
-          <button
-            onClick={handleCopy}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              copied
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-900 text-white hover:bg-gray-800'
-            }`}
-          >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4" />
-                Copy Body Text
-              </>
-            )}
-          </button>
-        </div>
+      </div>
+      
+      <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+        <span className="text-xs text-gray-500">Content generated by Gemini 2.5 Flash</span>
+        <button
+          onClick={handleCopy}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${
+            copied
+              ? 'bg-green-100 text-green-700 border border-green-200'
+              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          {copied ? (
+            <>
+              <Check className="w-4 h-4" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4" />
+              Copy Text
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
